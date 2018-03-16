@@ -7,15 +7,26 @@
     <input type="submit" name="sub" value="提交">
 </form>
 <?php
+//    if(isset($_POST['sub'])){
+//        $d=array(
+//            "title"=>$_POST['title'],
+//            "cont"=>$_POST['cont'],
+//            "date"=>$_POST['date']
+//        );
+//        echo "<b>转换字符串结果：</b>";
+//        foreach($d as $i=>$v){
+//            echo $v."&nbsp;";
+//        }
+//    }
+
     if(isset($_POST['sub'])){
         $d=array(
             "title"=>$_POST['title'],
             "cont"=>$_POST['cont'],
             "date"=>$_POST['date']
         );
+        $s = implode(" ",$d);
         echo "<b>转换字符串结果：</b>";
-        foreach($d as $i=>$v){
-            echo $v."&nbsp;";
-        }
+        echo $s;
     }
 ?>
