@@ -1,7 +1,13 @@
 <?php
 	include "conn.php";
+	if(isset($_GET['url'])){
+		$url=$_GET['url'];
+		
+	}
 	if(isset($_POST['sub'])){
 		$uname=$_POST['uname'];
+		$newurl=$_POST['url'];
+		
 		$pass=$_POST['pass'];
 		$mpass=md5($pass);
 		
@@ -11,7 +17,14 @@
 		if($rs){
 			setcookie('uid',$rs['uid']);
 			setcookie('name',$rs['uname']);
-			echo "<script>location='index.php'</script>";
+			if($newurl){
+				
+				echo "<script>location='$newurl'</script>";
+			}else{
+				
+				echo "<script>location='index.php'</script>";
+			}
+			
 		}
 	}
 
@@ -19,7 +32,9 @@
 
 <meta charset="utf-8">
 <form action="login.php" method="post">
+	<input type="hidden" name="url" value="<?php echo $url?>">
 	用户名:<input type="text" name="uname"><br />
 	密码:<input type="password" name="pass"><br />
 	<input type="submit" name="sub" value="登录">	
 </form>
+<a href="reg.php">注册</a>
