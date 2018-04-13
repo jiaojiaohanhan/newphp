@@ -4,13 +4,10 @@
   <meta http-equiv="Content-Language" content="zh-CN">
   <title>申请账号 - SYSIT个人博客</title>
   <base href="<?php echo site_url();?>"/>
-    <link rel="stylesheet" href="css/oschina2011.css" type="text/css" media="screen">
-  <link rel="stylesheet" href="css/thickbox.css" type="text/css" media="screen">
-  <link rel="stylesheet" href="css/osc-popup.css" type="text/css" media="screen">
-  <script type="text/javascript" src="js/jquery-1.js"></script>
-  <script type="text/javascript" src="js/jquery.js"></script>
-  <script type="text/javascript" src="js/thickbox.js"></script>
-  <script type="text/javascript" src="js/common.js"></script>
+    <link rel="stylesheet" href="assets/css/oschina2011.css" type="text/css" media="screen">
+  <link rel="stylesheet" href="assets/css/thickbox.css" type="text/css" media="screen">
+  <link rel="stylesheet" href="assets/css/osc-popup.css" type="text/css" media="screen">
+  <script type="text/javascript" src="assets/js/jquery-1.12.4.js"></script>
   <style type="text/css">
     body,table,input,textarea,select {font-family:Verdana,Simsun,sans-serif;}  
   </style>
@@ -42,32 +39,34 @@
     	<tbody><tr id="tr_email">
     		<th nowrap="nowrap">电子邮箱：</th>
     		<td>
-				<input name="email" id="f_email" class="TEXT" style="width: 200px;" type="text">
-				<span id="email_tip" class="nodisp"></span>
+				<input name="email" id="email" class="TEXT" style="width: 200px;" type="text">
+				<span id="email_tip"></span>
 			</td>    			
     	</tr>
     	<tr>
     		<th>姓名：</th>		
-    		<td><input name="name" id="f_name" maxlength="20" class="TEXT" style="width: 150px;" type="text">
+    		<td><input name="uname" id="username" maxlength="20" class="TEXT" style="width: 150px;" type="text">
 				<span id="name_msg">不能超过10个字</span>
 			</td>
     	</tr>
     	<tr>
     		<th>登录密码：</th>
-    		<td><input name="pwd" id="f_pwd" class="TEXT" style="width: 150px;" type="password">
-				<span id="password_msg">至少四位</span>		
+    		<td><input name="pwd" id="password" class="TEXT" style="width: 150px;" type="password">
+				<span id="password_msg">至少四位</span>
 			</td>    		
     	</tr>
     	<tr>
     		<th>密码确认：</th>		
-    		<td><input name="pwd2" id="f_pwd2" class="TEXT" style="width: 150px;" type="password"></td>
+    		<td><input name="pwd2" id="password2" class="TEXT" style="width: 150px;" type="password">
+				<span id="password_msg2"></span>
+			</td>
     	</tr>
     	<tr id="tr_gender">
         	<th>性别：</th>		
     		<td>
 				<input name="gender" value="1" id="gender_1" type="radio"><label for="gender_1">男</label>&nbsp;&nbsp;&nbsp;
 				<input name="gender" value="2" id="gender_2" type="radio"><label for="gender_2">女</label>
-				<span class="nodisp">请选择性别</span>
+				<span id="gender_msg"></span>
 			</td>	
         </tr>
     	<tr id="tr_area">
@@ -111,19 +110,18 @@
 	<option value="海外">海外</option>
 </select>
 <select name="city" id="userCity"></select>
-<script src="images/getcity.js"></script><span class="nodisp">请选择您所在的地区</span></td>
+<span class="nodisp">请选择您所在的地区</span></td>
     	</tr>
     	<tr>
     		<th>验证码：</th>		
     		<td><input id="f_vcode" name="verifyCode" size="6" class="TEXT" type="text">
-			<span><a href="javascript:_rvi()">换另外一个图</a></span>
+			<span id="sp1">换另外一个图</a></span>
 			</td>
     	</tr>
 		<tr>
     		<th>&nbsp;</th>		
 			<td>
-			<img id="img_vcode" alt="..." src="images/captcha.png" style="border: 2px solid rgb(204, 204, 204);" align="absmiddle">
-            <script language="javascript">function _rvi(){document.getElementById('img_vcode').src = '/action/user/captcha?t='+Math.random(1000);}</script>
+			<img id="img_vcode" alt="..." src="captcha/1522571418.4276.jpg" style="border: 2px solid rgb(204, 204, 204);" align="absmiddle">
 			</td>
 		</tr>
     	<tr class="buttons">
@@ -148,26 +146,60 @@
 	</ol>
 </div>
 <div class="clear"></div>
-</div>
-
-	<div id="OSC_Footer">© 赛斯特(WWW.SYSIT.ORG)</div>
-</div>
-<scirpt>
-	$(function(){
-		$(#f_email).blur(function(){
-			//四个参数：url(提交路径)，data,callback(回调函数),type
-			$get("user/check_name",{name:this.value},function(data){
-				if(data=='success'){
-					$('#email_tip').html('√')
-				}
-			
-			},"text")
+<script>
+	$("#email").on("blur",function(){
+		if(this.value.indexOf("@")==-1){
+			$("#email_tip").html("请输入有效的email地址")
+		}else{
+			$("#email_tip").html("")
+		}
+	});
+	$("#username").on("blur",function(){
+		$.get("user/check_name",{
+				uname:this.value
+			},function(data){
+			if(data.indexOf("success")>=0){
+				$("#name_msg").html("用户名可用");
+			}else {
+				$("#name_msg").html("用户名重复");
+			}
+//			if(data=="success"){
+//				$("#name_msg").html("用户名可用");
+//			}else {
+//				$("#name_msg").html("用户名重复");
+//			}
+		},"text")
+	});
+	$("#password").on("keyup",function(){
+		if(this.value.length < 4){
+			$("#password_msg").html("至少四位")
+		}else {
+			$("#password_msg").html("")
+		}
+	});
+	$("#password2").on("blur",function(){
+		if(this.value!=$("#password").val()){
+			$("#password_msg2").html("两次密码不一致")
+		}else {
+			$("#password_msg2").html("")
 		};
 	});
-
-
-
-</scirpt>
+	$("#sp1").on("click",function(){
+		$.get("user/captcha",{},function(data){
+			var data2 = data.substr(288,15);
+			var oImg=document.getElementById("img_vcode");
+			oImg.src="captcha/"+data2+".jpg";
+//			data是一个长度为303或302的字符串，前287位为空，所以从288位开始截取字符串
+		},"text")
+	});
+	$("#frm_reg").on("submit",function(){
+		var Submit = true;//标识可提交
+		if($("[name=gender]:checked").length==0){
+			$("#gender_msg").html("请选择性别");
+			Submit = false;
+		}
+		return Submit;
+	});
+</script>
 </body>
-
 </html>

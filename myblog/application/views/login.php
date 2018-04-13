@@ -4,13 +4,10 @@
   <meta http-equiv="Content-Language" content="zh-CN">
   <title>登录 - SYSIT个人博客</title>
   <base href="<?php echo site_url();?>"/>
-    <link rel="stylesheet" href="css/oschina2011.css" type="text/css" media="screen">
-  <link rel="stylesheet" href="css/thickbox.css" type="text/css" media="screen">
-  <link rel="stylesheet" href="css/osc-popup.css" type="text/css" media="screen">
-  <script type="text/javascript" src="js/jquery-1.js"></script>
-  <script type="text/javascript" src="js/jquery.js"></script>
-  <script type="text/javascript" src="js/thickbox.js"></script>
-  <script type="text/javascript" src="js/common.js"></script>
+	<link rel="stylesheet" href="assets/css/oschina2011.css" type="text/css" media="screen">
+	<link rel="stylesheet" href="assets/css/thickbox.css" type="text/css" media="screen">
+	<link rel="stylesheet" href="assets/css/osc-popup.css" type="text/css" media="screen">
+	<script type="text/javascript" src="assets/js/jquery-1.12.4.js"></script>
   <style type="text/css">
     body,table,input,textarea,select {font-family:Verdana,Simsun,sans-serif;}  
   </style>
@@ -40,8 +37,8 @@
     <div id="error_msg" class="error_msg" style="display:none;"></div>
     <table>
     	<tbody><tr>
-    		<th  nowrap="nowrap">邮箱 或 账号：</th>
-    		<td><input name="email" id="f_email" class="TEXT" style="width: 200px;" type="text"></td>
+    		<th  nowrap="nowrap">用户名：</th>
+    		<td><input name="uname" id="f_email" class="TEXT" style="width: 200px;" type="text"></td>
     	</tr>
     	<tr>
     		<th>登录密码：</th>
@@ -74,10 +71,6 @@
 </div>
 </div>
 <script>
-	$(function(){
-		$('#f_email').blur(function(){
-			
-		});
-	});
+
 </script>
 </body></html>

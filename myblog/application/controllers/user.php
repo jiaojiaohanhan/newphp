@@ -1,136 +1,96 @@
-<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+<?php defined('BASEPATH') OR exit('No direct script access allowed');
 
-class User extends CI_Controller {
-	public function __construct(){
-		parent::__construct();
-		$this->load->model('blog_model');
-		$this->load->model('user_model');
-	}
-	public function user_index()
-	{
-		$user_id=$this->input->get('writer');
-		//$blog=$this->blog_model->get_need_by_user_id($user_id);
-		$writer=$this->user_model->get_by_id($user_id);
-		$blogs=$this->blog_model->get_by_writer($user_id);
-		$cata=$this->blog_model->get_cata_by_writer($user_id);
-		$data=array(
-			'writer'=>$writer,
-			'blogs'=>$blogs,
-			'cata'=>$cata
-		);
-		//var_dump($blog);
-		//$data=array('blog'=>$blog);
-		$this->load->view('user_index',$data);
-	}
-	public function afterlogin()
-	{
-		$this->load->view('afterlogin');
-	}
-	public function login()
-	{
-		$this->load->view('login');
-	}
-	public function logout(){
-		$this->session->unset_userdata('login_user');
-		redirect('user/login');
-	}
-	public function reg()
-	{
-		$this->load->view('reg');
-	}
-	public function check_login(){
-		$emile=$this->input->post('email');
-		$password=$this->input->post('pwd');
-		$this->load->model('user_model');
-		
-		$row=$this->user_model->get_by_name_password($emile,$password);
-		if($row){//$row在php中是一个对象，也就是数据库的表中的每一行就是一个对象，每个列，就是对象的一个属性
-			//若登陆成功，向session存入用户信息
-			$this->session->set_userdata("login_user",$row);
-			//$this->();//(this)当前类的afterlogin函数
-			redirect("user/user_index?writer=$row->USER_ID");
-		}else{
-			$this->login();//(this)当前类的login函数
-		}
-	}
-	public function do_reg(){
-		//接收数据
-		$emile=$this->input->post('email');
-		$pwd=$this->input->post('pwd');
-		$pwd2=$this->input->post('pwd2');
-		$name=$this->input->post('name');
-		$sex=$this->input->post('gender');
-		$province=$this->input->post('province');
-		$city=$this->input->post('city');
-		//数据验证
-		if($pwd!=$pwd2){
-			$this->load->view(reg);
-		}else{
-			$data=array(
-				"ACCOUNT"=>$emile,
-				"PASSWORD"=>$pwd,
-				"NAME"=>$name,
-				"GENDER"=>$sex,
-				"PROVINCE"=>$province,
-				"CITY"=>$city
-			);
-		}
-		//访问数据库
-		$this->load->model('user_model');
-		$result=$this->user_model->save($data);
-		if($result){
-			redirect('user/login');//(this)当前类的afterlogin函数
-		}else{
-			$this->reg();//(this)当前类的login函数
-		}
-		
-	}
-	public function check_infor()
-	{
-		$login_user=$this->session->userdata("login_user");
-		$user_id=$login_user->USER_ID;
-		$row=$this->user_model->get_by_name($user_id);
-		$data=array(
-			'user'=>$row
-		);
-		$this->load->view('profile',$data);
-	}
-	public function update(){
-		$login_user=$this->session->userdata("login_user");
-		$user_id=$login_user->USER_ID;
-		$name=$this->input->post('name');
-		$gender=$this->input->post('gender');
-		$y=$this->input->post('y');
-		$m=$this->input->post('m');
-		$d=$this->input->post('d');
-		$birth=$y.'-'.$m.'-'.$d;
-		$province=$this->input->post('province');
-		$city=$this->input->post('city');
-		$signature=$this->input->post('signature');
-		
-		$result=$this->user_model->update_user($user_id,$name,$gender,$birth,$province,$city,$signature);
-		redirect("user/check_infor?user=$user_id/$result");
-	}
-	public function adminIndex(){
-		$this->load->view('adminIndex');
-	}
-	public function chpwd()
-	{
-		$this->load->view('chpwd');
-	}
-	public function usersetting(){
-		
-		$this->load->view('usersetting');
-	}
-	public function update_mood(){
-		$login_user=$this->session->userdata("login_user");
-		$user_id=$login_user->USER_ID;
-		$mood=$this->input->post('space_name');
-		$result=$this->user_model->update_mood($user_id,$mood);
-		//因為只改變了數據庫中的心情，所以需要重新加載一次session
-		$row=$this->user_model->get_by_name($user_id);
-		$this->session->set_userdata("login_user",$row);
-		redirect("user/adminIndex");
-	}
-	
+class User extends CI_Controller{
+    public function __construct(){
+        parent::__construct();
+        $this->load->helper('captcha');
+    }
+    public function captcha(){
+        $vals = array(
+            'word'      => rand(1000,9999),
+            'img_path'  => './captcha/',
+            'img_url'   => base_url().'captcha/',
+            'img_width' => '150',
+            'img_height'    => 30,
+            'expiration'    => 7200,
+            'word_length'   => 8,
+            'font_size' => 16,
+            'colors'    => array(
+                'background' => array(255, 255, 255),
+                'border' => array(255, 255, 255),
+                'text' => array(0, 0, 0),
+                'grid' => array(255, 40, 40)
+            )
+        );
+
+        $cap = create_captcha($vals);
+        echo $cap['time'];
+//        echo $cap['image'];
+//        echo $cap['word'];
+
+        header('content-type:application:json;charset=utf8');
+        header('Access-Control-Allow-Origin:*');
+        header('Access-Control-Allow-Methods:GET,OPTION');
+        header('Access-Control-Allow-Headers:x-requested-with,content-type');
+    }
+    public function reg(){
+        $this->load->view("reg");
+    }
+    public function check_name(){
+        $name = $this->input->get("uname");
+
+        $this->load->model("user_model");
+        $result = $this->user_model->get_by_name($name);
+        if($result){
+            echo "fail";
+        }else{
+            echo "success";
+        }
+    }
+    public function do_reg(){
+//        $email = htmlspecialchars($this->input->post("email"));
+        $email = $this->input->post("email");
+        $name = $this->input->post("uname");
+        $pass = $this->input->post("pwd");
+        $gender = $this->input->post("gender");
+
+        $this->load->model("user_model");
+        $result = $this->user_model->save_user($email,$name,$pass,$gender);
+        if($result){
+            redirect("user/login");
+        }else{
+            redirect("user/reg");
+        }
+    }
+    public function login()
+    {
+        $this->load->view("login");
+    }
+    public function check_login(){
+        $username = $this->input->post("uname");
+        $password = $this->input->post("pwd");
+
+        $this->load->model("user_model");
+        $result = $this->user_model->get_by_name_pwd($username,$password);
+        if($result){
+            $this->session->set_userdata("loginedUser",$result);
+            redirect("user/index");
+        }else{
+            echo "fail";
+        }
+    }
+    public function unlogin(){
+        $this->session->unset_userdata("loginedUser");
+        redirect("user/login");
+    }
+    public function index(){
+        $loginedUser = $this->session->userdata("loginedUser");
+        $this->load->model("article_model");
+        $articles = $this->article_model->get_articles_by_user($loginedUser->user_id);
+        $types = $this->article_model->get_types_by_user($loginedUser->user_id);
+        $this->load->view("index",array(
+            "articles"=>$articles,
+            "types"=>$types
+        ));
+    }
 }
